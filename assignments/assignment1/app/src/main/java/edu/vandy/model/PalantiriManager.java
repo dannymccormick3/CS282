@@ -1,5 +1,7 @@
 package edu.vandy.model;
 
+import android.icu.text.DateFormat;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +43,17 @@ public class PalantiriManager {
         // indicate it's available, and initialize the Semaphore to
         // use a "fair" implementation that mediates concurrent access
         // to the given Palantiri.
-        // TODO -- you fill in here.
+        // TODO -- you fill in here. - DONE
+        //Create and initialize HashMap, setting all palantir to
+        //true to indicate that they are available
+        mPalantiriMap = new HashMap<Palantir,Boolean>();
+        for (Palantir p:palantiri) {
+            mPalantiriMap.put(p,true);
+        }
+        //Initialize the semaphore with the correct number of available
+        //palantiri and give it the fair implementation
+        mAvailablePalantiri = new Semaphore(palantiri.size(),true);
+
     }
 
     /**
@@ -55,7 +67,24 @@ public class PalantiriManager {
         // indicates it's available for use).  Replace the value of
         // this key with "false" to indicate the Palantir isn't
         // available and then return that palantir to the client. 
-        // TODO -- you fill in here.
+        // TODO -- you fill in here. - DONE
+        //Try to acquire a semaphore, blocking if necessary
+        try {
+            mAvailablePalantiri.acquire();
+        } catch (InterruptedException e) {
+            //If interrupted before acquiring the semaphore, return nicely
+            return null;
+        }
+
+
+        //Iterate over HashMap. If palantir is free, set it to being used
+        //and return it
+        for (Map.Entry<Palantir,Boolean> mEntry:mPalantiriMap.entrySet()) {
+            if(mEntry.getValue()){
+                mEntry.setValue(false);
+                return mEntry.getKey();
+            }
+        }
 
         // This shouldn't happen, but we need this here to make the
         // compiler happy.
@@ -70,8 +99,16 @@ public class PalantiriManager {
         // Put the "true" value back into HashMap for the palantir key
         // in a thread-safe manner and release the Semaphore if all
         // works properly.
-        // TODO -- you fill in here.
-
+        // TODO -- you fill in here. - DONE
+        //Only worry about the passed in palantir if it exists in the map
+        if(mPalantiriMap.containsKey(palantir)) {
+            synchronized (mAvailablePalantiri) {
+                //Set palantir to available
+                mPalantiriMap.put(palantir, true);
+                //Release the semaphore
+                mAvailablePalantiri.release();
+            }
+        }
     }
 
     /*

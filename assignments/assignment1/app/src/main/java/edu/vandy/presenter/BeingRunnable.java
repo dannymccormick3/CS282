@@ -100,8 +100,8 @@ public class BeingRunnable
     private boolean gazeIntoPalantir(int beingId,
                                      String threadName) {
         // Return if PalantiriPresenter instructs us to stop gazing.
-        // TODO -- replace "false" with the appropriate call.
-        if (false) {
+        // TODO -- replace "false" with the appropriate call. - DONE
+        if (Thread.interrupted()) {
             Log.d(TAG,
                   "Thread.interrupted() is true for Being "
                   + beingId
@@ -121,8 +121,8 @@ public class BeingRunnable
 						
                 // Get a Palantir from the Model layer - this call can
                 // block if there are no available Palantiri.
-                // TODO -- you fill in here.
-                palantir = null;
+                // TODO -- you fill in here. - DONE
+                palantir = mPresenter.getModel().acquirePalantir();
 
                 // Do a sanity check.
                 if (palantir == null) {
@@ -171,7 +171,8 @@ public class BeingRunnable
             } finally {
                 // Return the Palantir back to PalantiriManager in the
                 // Model layer.
-                // TODO -- you fill in here.
+                // TODO -- you fill in here. - DONE
+                mPresenter.getModel().releasePalantir(palantir);
             }
             return true;
         }
@@ -198,6 +199,9 @@ public class BeingRunnable
     private boolean incrementGazingCountAndCheck(int beingId,
                                                  Palantir palantir) {
         // TODO - You fill in here.
+
+        return(mGazingThreads.incrementAndGet() <= mBeingCount.get());
+
     }
 
     /**
@@ -207,5 +211,6 @@ public class BeingRunnable
      */
     private void decrementGazingCount() {
         // TODO - You fill in here.
+        mGazingThreads.decrementAndGet();
     }
 }

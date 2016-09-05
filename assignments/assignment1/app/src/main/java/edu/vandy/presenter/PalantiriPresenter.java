@@ -258,7 +258,16 @@ public class PalantiriPresenter
     private void beginBeingThreads(int beingCount) {
         // Generate beingCount number of Threads that are stored in a
         // list and then start all the Threads in the List.
-        // TODO - You fill in here.
+        // TODO - You fill in here. - DONE
+        //Create beingCount threads and initialize it
+        mBeingThreads = new ArrayList<>();
+        for(int i = 0; i < beingCount; i++) {
+            mBeingThreads.add(new Thread(new BeingRunnable(this)));
+        }
+        //Start all the threads
+        for (Thread t:mBeingThreads) {
+            t.start();
+        }
     }
 
     /**
@@ -269,7 +278,25 @@ public class PalantiriPresenter
         // Start a Java Thread that waits for all the Threads to
         // finish and then calls mView.get().done() to inform the View
         // layer that the simulation is done.
-        // TODO -- you fill in here.
+        // TODO -- you fill in here. - DONE
+        //Start new thread to wait on other threads
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (Thread t: mBeingThreads) {
+                    try {
+                        //Wait on all the threads to finish
+                        t.join();
+                    }
+                    catch (InterruptedException ex){
+                        //If interrupted, shut down
+                        return;
+                    }
+                }
+                //Once all threads have finished, inform view that simulation is done
+                mView.get().done();
+            }
+        }).start();
     }
 
     /**
@@ -282,7 +309,8 @@ public class PalantiriPresenter
     public void shutdown() {
         synchronized(this) {
             // Interrupt all the Threads.
-            // TODO -- you fill in here.
+            // TODO -- you fill in here. - DONE
+            mBeingThreads.stream().forEach(Thread::interrupt);
 
             // Inform the user that we're shutting down the
             // simulation.
