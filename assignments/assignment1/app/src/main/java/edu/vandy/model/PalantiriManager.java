@@ -1,7 +1,5 @@
 package edu.vandy.model;
 
-import android.icu.text.DateFormat;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +51,6 @@ public class PalantiriManager {
         //Initialize the semaphore with the correct number of available
         //palantiri and give it the fair implementation
         mAvailablePalantiri = new Semaphore(palantiri.size(),true);
-
     }
 
     /**
@@ -76,19 +73,21 @@ public class PalantiriManager {
             return null;
         }
 
-
-        //Iterate over HashMap. If palantir is free, set it to being used
-        //and return it
-        for (Map.Entry<Palantir,Boolean> mEntry:mPalantiriMap.entrySet()) {
-            if(mEntry.getValue()){
-                mEntry.setValue(false);
-                return mEntry.getKey();
+        // @@ Your implementation has race conditions..
+        // @@ Fixed by adding following synchronized statement
+        synchronized (mPalantiriMap) {
+            //Iterate over HashMap. If palantir is free, set it to being used
+            //and return it
+            for (Map.Entry<Palantir, Boolean> mEntry : mPalantiriMap.entrySet()) {
+                if (mEntry.getValue()) {
+                    mEntry.setValue(false);
+                    return mEntry.getKey();
+                }
             }
         }
-
         // This shouldn't happen, but we need this here to make the
         // compiler happy.
-        return null; 
+        return null;
     }
 
     /**

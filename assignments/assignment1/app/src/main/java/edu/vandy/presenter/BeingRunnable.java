@@ -103,10 +103,10 @@ public class BeingRunnable
         // TODO -- replace "false" with the appropriate call. - DONE
         if (Thread.interrupted()) {
             Log.d(TAG,
-                  "Thread.interrupted() is true for Being "
-                  + beingId
-                  + " in Thread "
-                  + threadName);
+                    "Thread.interrupted() is true for Being "
+                            + beingId
+                            + " in Thread "
+                            + threadName);
 
             // If we've been instructed to stop gazing, notify the UI
             // and return gracefully.
@@ -118,7 +118,7 @@ public class BeingRunnable
             try {
                 // Show that we're waiting on the screen.
                 mPresenter.mView.get().markWaiting(beingId);
-						
+
                 // Get a Palantir from the Model layer - this call can
                 // block if there are no available Palantiri.
                 // TODO -- you fill in here. - DONE
@@ -127,16 +127,16 @@ public class BeingRunnable
                 // Do a sanity check.
                 if (palantir == null) {
                     Log.d(TAG,
-                      "Palantir was null in for Being "
-                      + beingId
-                      + " in thread "
-                      + threadName);
+                            "Palantir was null in for Being "
+                                    + beingId
+                                    + " in thread "
+                                    + threadName);
                     return false;
                 }
 
                 // Make sure we were supposed to get a Palantir.
-                if (!incrementGazingCountAndCheck(beingId, 
-                                                  palantir))
+                if (!incrementGazingCountAndCheck(beingId,
+                        palantir))
                     return false;
 
                 // Mark it as used on the screen.
@@ -161,8 +161,8 @@ public class BeingRunnable
                 decrementGazingCount();
             } catch (Exception e) {
                 Log.d(TAG,
-                      "Exception caught in Being "
-                      + beingId);
+                        "Exception caught in Being "
+                                + beingId);
 
                 // If we're interrupted by an exception, notify the UI
                 // and return gracefully.
@@ -199,9 +199,17 @@ public class BeingRunnable
     private boolean incrementGazingCountAndCheck(int beingId,
                                                  Palantir palantir) {
         // TODO - You fill in here.
-
-        return(mGazingThreads.incrementAndGet() <= mBeingCount.get());
-
+        // @@ Something(s) important are missing here!  Read the spec above..
+        // @@ Fixed by adding the shutdown call in else statement
+        if(mGazingThreads.incrementAndGet() <= mBeingCount.get()){
+            return true;
+        }
+        else{
+            //Shutdown if there has been an error and there are more
+            //gazers than Palantiri
+            mPresenter.shutdown();
+            return false;
+        }
     }
 
     /**

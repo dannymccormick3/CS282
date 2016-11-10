@@ -280,22 +280,21 @@ public class PalantiriPresenter
         // layer that the simulation is done.
         // TODO -- you fill in here. - DONE
         //Start new thread to wait on other threads
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (Thread t: mBeingThreads) {
-                    try {
-                        //Wait on all the threads to finish
-                        t.join();
-                    }
-                    catch (InterruptedException ex){
-                        //If interrupted, shut down
-                        return;
-                    }
+        // @@ Please try using a lambda here!
+        // @@ Fixed by using a lambda instead of explicitly declaring run
+        new Thread(() -> {
+            for (Thread t: mBeingThreads) {
+                try {
+                    //Wait on all the threads to finish
+                    t.join();
                 }
-                //Once all threads have finished, inform view that simulation is done
-                mView.get().done();
+                catch (InterruptedException ex){
+                    //If interrupted, shut down
+                    return;
+                }
             }
+            //Once all threads have finished, inform view that simulation is done
+            mView.get().done();
         }).start();
     }
 
